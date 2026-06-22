@@ -8,12 +8,11 @@ workflows:
     scripts:
       - name: Build App for Simulator
         script: |
-          xcodebuild -project "Lab14IntroFirebase.xcodeproj" \
+          xcodebuild clean build -project "Lab14IntroFirebase.xcodeproj" \
             -scheme "Lab14IntroFirebase" \
             -sdk iphonesimulator \
             -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO \
-            DEPLOYMENT_LOCATION=YES \
-            IPHONEOS_DEPLOYMENT_TARGET=16.2
+            -arch x86_64 \
+            CODE_SIGNING_ALLOWED=NO
     artifacts:
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
