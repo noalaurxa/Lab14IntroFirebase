@@ -1,10 +1,3 @@
-//
-//  AuthView.swift
-//  Lab14IntroFirebase
-//
-//  Created by Tecsup on 15/06/26.
-//
-
 import SwiftUI
 import FirebaseAuth
 import FirebaseCore
@@ -16,7 +9,7 @@ struct AuthView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var authStateListener: AuthStateDidChangeListenerHandle?
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -27,9 +20,7 @@ struct AuthView: View {
                 Spacer()
                 if isSignedIn {
                     MessagesView()
-                    
                 } else {
-                    // Sign in form
                     VStack(spacing: 15) {
                         TextField("Email", text: $email)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -38,14 +29,10 @@ struct AuthView: View {
                         SecureField("Password", text: $password)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         HStack(spacing: 20) {
-                            Button("Sign In") {
-                                signIn()
-                            }
-                            .buttonStyle(PrimaryButtonStyle())
-                            Button("Sign Up") {
-                                signUp()
-                            }
-                            .buttonStyle(SecondaryButtonStyle())
+                            Button("Sign In") { signIn() }
+                                .buttonStyle(PrimaryButtonStyle())
+                            Button("Sign Up") { signUp() }
+                                .buttonStyle(SecondaryButtonStyle())
                         }
                     }
                     .padding(.horizontal, 30)
@@ -55,22 +42,19 @@ struct AuthView: View {
             .navigationBarHidden(true)
         }
         .alert("Message", isPresented: $showAlert) {
-            Button("OK") { }
+            Button("OK") {}
         } message: {
             Text(alertMessage)
         }
-        .onAppear {
-            checkAuthState()
-        }
+        .onAppear { checkAuthState() }
         .onChange(of: isSignedIn) {
-            // Clear form when signing out
             if !isSignedIn {
                 email = ""
                 password = ""
             }
         }
     }
-    
+
     // MARK: - Authentication Functions
     func signIn() {
         guard !email.isEmpty && !password.isEmpty else {
@@ -78,7 +62,6 @@ struct AuthView: View {
             showAlert = true
             return
         }
-
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let error = error {
                 self.alertMessage = "Sign in failed: \(error.localizedDescription)"
@@ -86,7 +69,6 @@ struct AuthView: View {
                 print("error.localizedDescription: '\(error.localizedDescription)'")
             } else {
                 guard let user = result?.user else { return }
-                
                 if let userEmail = user.email, userEmail.lowercased().hasSuffix("@tecsup.edu.pe") {
                     self.isSignedIn = true
                     self.alertMessage = "Sign in successful!"
@@ -100,20 +82,18 @@ struct AuthView: View {
             }
         }
     }
-    
+
     func signUp() {
         guard !email.isEmpty && !password.isEmpty else {
             alertMessage = "Please enter both email and password"
             showAlert = true
             return
         }
-        
         guard password.count >= 6 else {
             alertMessage = "Password must be at least 6 characters"
             showAlert = true
             return
         }
-        
         Auth.auth().createUser(withEmail: email, password: password) { result, error in
             if let error = error {
                 alertMessage = "Sign up failed: \(error.localizedDescription)"
@@ -125,7 +105,7 @@ struct AuthView: View {
             }
         }
     }
-    
+
     func signOut() {
         do {
             try Auth.auth().signOut()
@@ -137,17 +117,15 @@ struct AuthView: View {
             showAlert = true
         }
     }
-    
+
     func checkAuthState() {
-        // Listen for authentication state changes and store the listener handle
         authStateListener = Auth.auth().addStateDidChangeListener { auth, user in
             DispatchQueue.main.async {
                 self.isSignedIn = user != nil
             }
         }
     }
-    
-    
+
     // MARK: - Button Styles
     struct PrimaryButtonStyle: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {
@@ -159,7 +137,7 @@ struct AuthView: View {
                 .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
         }
     }
-    
+
     struct SecondaryButtonStyle: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
@@ -173,7 +151,7 @@ struct AuthView: View {
                 .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
         }
     }
-    
+
     struct SignOutButtonStyle: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
