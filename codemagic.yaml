@@ -9,22 +9,22 @@ workflows:
       - name: Install xcodeproj gem
         script: |
           gem install xcodeproj
-      - name: Fix Target Membership Automatically
+      - name: Fix Target Membership Automatically (no duplicates)
         script: |
           ruby -e '
             require "xcodeproj"
             proj_path = "Lab14IntroFirebase.xcodeproj"
             proj = Xcodeproj::Project.open(proj_path)
             target = proj.targets.find { |t| t.name == "Lab14IntroFirebase" }
-            
-            # Buscar todos los archivos .swift en el proyecto
+
             Dir.glob("**/*.swift").each do |path|
               next if path.include?(".build") || path.include?("Pods")
-              
-              # Verificar si el archivo ya está referenciado, si no, lo añade
-              file_ref = proj.new_file(path) rescue proj.files.find { |f| f.path == path }
-              
-              if file_ref && !target.source_build_phase.files_references.include?(file_ref)
+              # Busca referencia existente por ruta
+              existing_ref = proj.files.find { |f| f.path == path }
+              file_ref = existing_ref || proj.new_file(path)
+              # Verifica si ya está en la fase de compilación
+              already_in_build = target.source_build_phase.files.any? { |b| b.file_ref.path == path }
+              unless already_in_build
                 target.add_file_references([file_ref])
                 puts "¡Éxito! Se añadió #{path} al Target de Xcode."
               end
