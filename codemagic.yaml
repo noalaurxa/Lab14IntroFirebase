@@ -6,6 +6,31 @@ workflows:
     environment:
       xcode: latest
     scripts:
+      - name: Install xcodeproj gem
+        script: |
+          gem install xcodeproj
+      - name: Fix Target Membership Automatically
+        script: |
+          ruby -e '
+            require "xcodeproj"
+            proj_path = "Lab14IntroFirebase.xcodeproj"
+            proj = Xcodeproj::Project.open(proj_path)
+            target = proj.targets.find { |t| t.name == "Lab14IntroFirebase" }
+            
+            # Buscar todos los archivos .swift en el proyecto
+            Dir.glob("**/*.swift").each do |path|
+              next if path.include?(".build") || path.include?("Pods")
+              
+              # Verificar si el archivo ya está referenciado, si no, lo añade
+              file_ref = proj.new_file(path) rescue proj.files.find { |f| f.path == path }
+              
+              if file_ref && !target.source_build_phase.files_references.include?(file_ref)
+                target.add_file_references([file_ref])
+                puts "¡Éxito! Se añadió #{path} al Target de Xcode."
+              end
+            end
+            proj.save
+          '
       - name: Build App for Simulator
         script: |
           xcodebuild build -project "Lab14IntroFirebase.xcodeproj" \
