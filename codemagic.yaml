@@ -17,17 +17,14 @@ workflows:
             proj = Xcodeproj::Project.open(proj_path)
             target = proj.targets.find { |t| t.name == "Lab14IntroFirebase" }
 
+            # Clear existing compile sources to avoid duplicates
+            target.source_build_phase.clear
+
             Dir.glob("**/*.swift").each do |path|
               next if path.include?(".build") || path.include?("Pods")
-              # Busca referencia existente por ruta
-              existing_ref = proj.files.find { |f| f.path == path }
-              file_ref = existing_ref || proj.new_file(path)
-              # Verifica si ya está en la fase de compilación
-              already_in_build = target.source_build_phase.files.any? { |b| b.file_ref.path == path }
-              unless already_in_build
-                target.add_file_references([file_ref])
-                puts "¡Éxito! Se añadió #{path} al Target de Xcode."
-              end
+              file_ref = proj.files.find { |f| f.path == path } || proj.new_file(path)
+              target.add_file_references([file_ref])
+              puts "Added #{path}"
             end
             proj.save
           '
