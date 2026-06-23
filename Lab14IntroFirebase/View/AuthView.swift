@@ -1,3 +1,10 @@
+//
+//  AuthView.swift
+//  Lab14IntroFirebase
+//
+//  Created by Tecsup on 15/06/26.
+//
+
 import SwiftUI
 import FirebaseAuth
 import FirebaseCore
